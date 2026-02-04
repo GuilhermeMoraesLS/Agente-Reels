@@ -4,6 +4,7 @@ import { useStore } from '../store'
 import { toast } from 'sonner'
 import { ChatMessage, ToolCall, ReasoningMessage, ChatEntry } from '@/types/os'
 import { getJsonMarkdown } from '@/lib/utils'
+import { useQueryState } from 'nuqs'
 
 interface SessionResponse {
   session_id: string
@@ -30,6 +31,7 @@ const useSessionLoader = () => {
   const authToken = useStore((state) => state.authToken)
   const setIsSessionsLoading = useStore((state) => state.setIsSessionsLoading)
   const setSessionsData = useStore((state) => state.setSessionsData)
+  const [, setSessionId] = useQueryState('session')
 
   const getSessions = useCallback(
     async ({ entityType, agentId, teamId, dbId }: LoaderArgs) => {
@@ -159,11 +161,16 @@ const useSessionLoader = () => {
             return processedMessages
           }
         }
-      } catch {
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('404')) {
+          setSessionId(null)
+          setMessages([])
+          toast.error('Sessão não encontrada. Limpando sessão ativa.')
+        }
         return null
       }
     },
-    [selectedEndpoint, authToken, setMessages]
+    [selectedEndpoint, authToken, setMessages, setSessionId]
   )
 
   return { getSession, getSessions }

@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 # Define o caminho absoluto para o arquivo JSON
-TRANSCRIPTIONS_FILE = Path(__file__).parent / 'transcripts.json'
+TRANSCRIPTIONS_FILE = Path(__file__).resolve().parent.parent / 'transcripts.json'
 
 def get_creator_transcriptions(creator_name):
     """
